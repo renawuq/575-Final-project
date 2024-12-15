@@ -27,11 +27,13 @@
 Due to privacy and confidentiality agreements, the dataset used in this project cannot be shared publicly. However, you can substitute the data with your own dataset.
 
 ## Code
-This part contain all the code we used for the project including data preprocessing and data analysis
-    - `data_preprocssing_clustering.Rmd`: It is the first script you should run for the data preprocessing and clustering 
-    - `DGE cbb575.Rmd`: The code we perform for DGE analysis and find marker
-    - `filtering20termsizes.ipynb`, `cytokinehelper2graph.ipynb`: helper code for Enrichment analysis
-    - `cluster0-20termsize.cys` \ `cluster0-20termsize.cys`: Enrichment analysis we performed with gProfiler and visualized with Cytoscape
+This part contains all the code we used for the project, including data preprocessing and data analysis:
+
+- `data_preprocessing_clustering.Rmd`: The first script you should run for data preprocessing and clustering.
+- `DGE_cbb575.Rmd`: The script for DGE analysis and identifying markers.
+- `filtering20termsizes.ipynb`: Helper code for the Enrichment analysis.
+- `cytokinehelper2graph.ipynb`: Another helper code for the Enrichment analysis.
+- `cluster0-20termsize.cys`: Enrichment analysis performed with gProfiler and visualized with Cytoscape.
 
 ## Image
 This folder contain some of the image generated from our code
