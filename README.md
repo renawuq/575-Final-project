@@ -15,7 +15,7 @@
     ```
 
 2. This project relies on data that cannot be shared publicly due to confidentiality agreements. However, you are welcome to use your own dataset. To do so:
-    - Download or prepare your own **UMX data** (or any relevant dataset) that you would like to analyze.
+    - Download or prepare your own **MEX data** (or any relevant dataset) that you would like to analyze.
     - Change the file paths in the code to point to your own dataset files.
 
 3. Ensure you have all required dependencies installed
