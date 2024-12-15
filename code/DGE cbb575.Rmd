@@ -1,0 +1,140 @@
+---
+title: "cbb575 final"
+author: "athreya"
+date: "2024-12-14"
+output: html_document
+---
+
+```{r}
+install.packages("BiocManager")
+
+```
+
+```{r}
+library(cowplot)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(Seurat)
+library(sctransform)
+library(ggplot2)
+library(patchwork)
+library(tidyverse)
+library(tidyr)
+
+```
+
+## Load in the object 
+```{r}
+load("path to object")
+
+```
+## Confirm and check class 
+```{r}
+class(TotalMerged)
+```
+
+## Plot Umap 
+```{r}
+DimPlot(TotalMerged, group.by = "pheno")
+```
+
+## DGE based on phenotype
+```{r}
+# Set the identities based on the 'pheno' column in the metadata
+Idents(TotalMerged) <- "pheno"
+
+
+dge_results <- FindMarkers(
+  object = TotalMerged,           
+  ident.1 = "GFP+",               # GFP+ cells (comparison group)
+  ident.2 = "GFP-",               # GFP- cells (reference group)
+  group.by = "pheno",            
+  logfc.threshold = 0,         
+  min.pct = 0.1,                 
+  test.use = "wilcox"             
+)
+
+
+```
+
+## Heatmap
+```{r}
+# Identify top 20 genes 
+top_genes <- rownames(dge_results)[order(dge_results$p_val_adj)][1:20]
+
+DoHeatmap(TotalMerged, features = top_genes, group.by = "pheno", label = TRUE)
+```
+
+
+## Making the Volcano Plot
+
+```{r}
+
+dge_results$gene <- rownames(dge_results)
+
+# Identify the top 5 upregulated and downregulated genes
+top_upregulated <- head(dge_results[order(dge_results$avg_log2FC, decreasing = TRUE), ], 5)
+top_downregulated <- head(dge_results[order(dge_results$avg_log2FC, decreasing = FALSE), ], 5)
+
+
+top_genes <- c(rownames(top_upregulated), rownames(top_downregulated))
+
+#column to indicate significance and fold-change threshold
+dge_results$highlight <- ifelse(dge_results$p_val_adj < 0.05 & abs(dge_results$avg_log2FC) >= 0.5, "red", "gray")
+
+# plot
+ggplot(dge_results, aes(x = avg_log2FC, y = -log10(p_val_adj) , color = highlight)) +
+  geom_point(alpha = 0.7) +  
+  geom_text(data = subset(dge_results, gene %in% top_genes), aes(label = gene), 
+            vjust = -0.5, hjust = 0.5, size = 3, color = "black") + 
+  theme_minimal() +
+  labs(x = "Log2 Fold Change", y = "-Log10 Adjusted P-value") +
+  scale_color_identity() + 
+  coord_cartesian(ylim = c(0, max_y * 1.2)) +
+  theme(legend.position = "none")
+
+```
+
+## Making a volcano with capped extremes and moved label for Sdf4
+```{r}
+# First, order the results by adjusted p-value and log2 fold change
+dge_results$gene <- rownames(dge_results)
+
+# Identify the top 5 upregulated and downregulated genes
+top_upregulated <- head(dge_results[order(dge_results$avg_log2FC, decreasing = TRUE), ], 5)
+top_downregulated <- head(dge_results[order(dge_results$avg_log2FC, decreasing = FALSE), ], 5)
+
+# Combine the top upregulated and downregulated genes
+top_genes <- c(rownames(top_upregulated), rownames(top_downregulated))
+
+# Add a new column to indicate significance and fold-change threshold
+dge_results$highlight <- ifelse(dge_results$p_val_adj < 0.05 & abs(dge_results$avg_log2FC) >= 0.5, "red", "gray")
+
+# Set p-value of 0 to a very small value to avoid infinite values in log10
+dge_results$adjusted_p_val <- ifelse(dge_results$p_val_adj == 0, 1e-300, dge_results$p_val_adj)
+
+# Calculate -log10 of the adjusted p-value
+dge_results$log10_padj <- -log10(dge_results$adjusted_p_val)
+
+# Create the volcano plot with custom label nudge for 'Sdf4'
+ggplot(dge_results, aes(x = avg_log2FC, y = log10_padj, color = highlight)) +
+  geom_point(alpha = 0.7) +  # Points colored by significance and fold change
+  # Label top 5 genes
+  geom_text(data = subset(dge_results, gene %in% top_genes & gene != "Sdf4"), 
+            aes(label = gene),
+            vjust = -0.5, hjust = 0.5,
+            size = 3, color = "black") +  
+  # Move 'Sdf4' label below its point
+  geom_text(data = subset(dge_results, gene == "Sdf4"), 
+            aes(label = gene), 
+            size = 3, color = "black", 
+            nudge_y = -8 , 
+            nudge_x = .07) +  # Apply nudge only to 'Sdf4'
+  theme_minimal() +
+  labs(x = "Log2 Fold Change", y = "-Log10 Adjusted P-value") +
+  scale_color_identity() +  # Use the colors defined in the 'highlight' column
+  theme(legend.position = "none")
+
+
+```
