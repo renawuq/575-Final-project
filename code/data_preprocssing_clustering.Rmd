@@ -198,9 +198,12 @@ DimPlot(TotalMergedHiRes, label = TRUE)
 ```
 
 ```{r}
+# example of differential gene expression analysis 
 markersHiRes <- FindAllMarkers(TotalMergedHiRes)
+cluster0.markers <- FindMarkers(TotalMergedHiRes, ident.1 = "0", logfc.threshold = 0.25, test.use = "roc", only.pos = TRUE)
 ```
 
 ```{r}
-cluster0.markers <- FindMarkers(TotalMergedHiRes, ident.1 = "0", logfc.threshold = 0.25, test.use = "roc", only.pos = TRUE)
+# preparation of enrichment analysis
+markersHiRes <- FindAllMarkers(TotalMergedHiRes)
 ```
