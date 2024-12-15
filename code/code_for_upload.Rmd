@@ -1,0 +1,213 @@
+---
+title: "Final Project"
+output: html_document
+date: "2024-12-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Call in libraries
+```{r}
+library(cowplot)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(Seurat)
+library(sctransform)
+library(ggplot2)
+library(patchwork)
+library(tidyverse)
+library(tidyr)
+library(metap)
+library(multtest)
+library(presto)
+library(glmGamPoi)
+```
+
+Load in 10X objects
+GFP- and GFP+ T cells from tissueney tissue 
+```{r}
+sample1 <- Read10X(data.dir = "file_path_to_tissue_data_sample1_1")
+sample2 <- Read10X(data.dir = "file_path_to_tissue_data_sample2_1")
+sample3 <- Read10X(data.dir = "file_path_to_tissue_data_sample3_1")
+
+sample1_2 <- Read10X(data.dir = "file_path_to_tissue_data_sample1_2")
+sample2_2 <- Read10X(data.dir = "file_path_to_tissue_data_sample2_2")
+sample3_2 <- Read10X(data.dir = "file_path_to_tissue_data_sample3_2")
+```
+
+Create seurat object from gene expression data (not TCR)
+```{r}
+sample1_seurat <- CreateSeuratObject(counts = sample1$`Gene Expression`, min.features = 200, project = "sample1")
+sample1_2_seurat <- CreateSeuratObject(counts = sample1_2$`Gene Expression`, min.features = 200, project = "sample1_2")
+sample2_seurat <- CreateSeuratObject(counts = sample2$`Gene Expression`, min.features = 200, project = "sample2")
+sample2_2_seurat <- CreateSeuratObject(counts = sample2_2$`Gene Expression`, min.features = 200, project = "sample2_2")
+sample3_seurat <- CreateSeuratObject(counts = sample3$`Gene Expression`, min.features = 200, project = "sample3")
+sample3_2_seurat <- CreateSeuratObject(counts = sample3_2$`Gene Expression`, min.features = 200, project = "sample3_2")
+```
+
+Upload metadata 
+```{r}
+sample1_seurat@meta.data$pheno<-"GFP-"
+sample1_seurat@meta.data$mice<-"mouse2"
+sample1_seurat@meta.data$cells<-"tissue_GFPneg"
+
+sample1_2_seurat@meta.data$pheno<-"GFP+"
+sample1_2_seurat@meta.data$mice<-"mouse2"
+sample1_2_seurat@meta.data$cells<-"tissue_GFPpos"
+
+sample2_seurat@meta.data$pheno<-"GFP-"
+sample2_seurat@meta.data$mice<-"mouse3"
+sample2_seurat@meta.data$cells<-"tissue_GFPneg"
+
+sample2_2_seurat@meta.data$pheno<-"GFP+"
+sample2_2_seurat@meta.data$mice<-"mouse3"
+sample2_2_seurat@meta.data$cells<-"tissue_GFPpos"
+
+sample3_seurat@meta.data$pheno<-"GFP-"
+sample3_seurat@meta.data$mice<-"mouse4"
+sample3_seurat@meta.data$cells<-"tissue_GFPneg"
+
+sample3_2_seurat@meta.data$pheno<-"GFP+"
+sample3_2_seurat@meta.data$mice<-"mouse4"
+sample3_2_seurat@meta.data$cells<-"tissue_GFPpos"
+```
+
+
+```{r}
+#QC filter for mt DNA
+sample1_seurat[["percent.mt"]]<-PercentageFeatureSet(sample1_seurat, pattern = "mt-")
+sample1_2_seurat[["percent.mt"]]<-PercentageFeatureSet(sample1_2_seurat, pattern = "mt-")
+sample2_seurat[["percent.mt"]]<-PercentageFeatureSet(sample2_seurat, pattern = "mt-")
+sample2_2_seurat[["percent.mt"]]<-PercentageFeatureSet(sample2_2_seurat, pattern = "mt-")
+sample3_seurat[["percent.mt"]]<-PercentageFeatureSet(sample3_seurat, pattern = "mt-")
+sample3_2_seurat[["percent.mt"]]<-PercentageFeatureSet(sample3_2_seurat, pattern = "mt-")
+```
+
+```{r}
+#Violin plots of QC, checking genes, expression, and mitochondrial genes
+p1<-VlnPlot(sample1_seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p2<-VlnPlot(sample1_2_seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p3<-VlnPlot(sample2_seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p4<-VlnPlot(sample2_2_seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p5<-VlnPlot(sample3_seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+p6<-VlnPlot(sample3_2_seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+
+p1
+p2
+p3
+p4
+p5
+p6
+```
+
+```{r}
+#filter out low quality reads 
+sample1_seurat<-subset(sample1_seurat, subset = percent.mt < 10 & nFeature_RNA > 200 & nCount_RNA > 500 & nCount_RNA < 10000)
+sample1_2_seurat<-subset(sample1_2_seurat, subset = percent.mt < 10 & nFeature_RNA > 200 & nCount_RNA > 500 & nCount_RNA < 10000)
+sample2_seurat<-subset(sample2_seurat, subset = percent.mt < 10 & nFeature_RNA > 200 & nCount_RNA > 500 & nCount_RNA < 10000)
+sample2_2_seurat<-subset(sample2_2_seurat, subset = percent.mt < 10 & nFeature_RNA > 200 & nCount_RNA > 500 & nCount_RNA < 10000)
+sample3_seurat<-subset(sample3_seurat, subset = percent.mt < 10 & nFeature_RNA > 200 & nCount_RNA > 500 & nCount_RNA < 10000)
+sample3_2_seurat<-subset(sample3_2_seurat, subset = percent.mt < 10 & nFeature_RNA > 200 & nCount_RNA > 500 & nCount_RNA < 10000)
+```
+
+```{r}
+counts_sample1 <- GetAssayData(sample1_seurat, assay = "RNA")
+Bad_list_sample1 <- str_subset(rownames(counts_sample1), "Trav|Trbv|Trgv|Rps|Rpl|Mrps|Ighv|Igl|Igk")
+counts_sample1 <- counts_sample1[-(which(rownames(counts_sample1) %in% Bad_list_sample1)),]
+refiltered_sample1_seurat <- subset(sample1_seurat, features = rownames(counts_sample1))
+
+counts_sample1_2 <- GetAssayData(sample1_2_seurat, assay = "RNA")
+Bad_list_sample1_2 <- str_subset(rownames(counts_sample1_2), "Trav|Trbv|Trgv|Rps|Rpl|Mrps|Ighv|Igl|Igk")
+counts_sample1_2 <- counts_sample1_2[-(which(rownames(counts_sample1_2) %in% Bad_list_sample1_2)),]
+refiltered_sample1_2_seurat <- subset(sample1_2_seurat, features = rownames(counts_sample1_2))
+
+counts_sample2 <- GetAssayData(sample2_seurat, assay = "RNA")
+Bad_list_sample2 <- str_subset(rownames(counts_sample2), "Trav|Trbv|Trgv|Rps|Rpl|Mrps|Ighv|Igl|Igk")
+counts_sample2 <- counts_sample2[-(which(rownames(counts_sample2) %in% Bad_list_sample2)),]
+refiltered_sample2_seurat <- subset(sample2_seurat, features = rownames(counts_sample2))
+
+counts_sample2_2 <- GetAssayData(sample2_2_seurat, assay = "RNA")
+Bad_list_sample2_2 <- str_subset(rownames(counts_sample2_2), "Trav|Trbv|Trgv|Rps|Rpl|Mrps|Ighv|Igl|Igk")
+counts_sample2_2 <- counts_sample2_2[-(which(rownames(counts_sample2_2) %in% Bad_list_sample2_2)),]
+refiltered_sample2_2_seurat <- subset(sample2_2_seurat, features = rownames(counts_sample2_2))
+
+counts_sample3 <- GetAssayData(sample3_seurat, assay = "RNA")
+Bad_list_sample3 <- str_subset(rownames(counts_sample3), "Trav|Trbv|Trgv|Rps|Rpl|Mrps|Ighv|Igl|Igk")
+counts_sample3 <- counts_sample3[-(which(rownames(counts_sample3) %in% Bad_list_sample3)),]
+refiltered_sample3_seurat <- subset(sample3_seurat, features = rownames(counts_sample3))
+
+counts_sample3_2 <- GetAssayData(sample3_2_seurat, assay = "RNA")
+Bad_list_sample3_2 <- str_subset(rownames(counts_sample3_2), "Trav|Trbv|Trgv|Rps|Rpl|Mrps|Ighv|Igl|Igk")
+counts_sample3_2 <- counts_sample3_2[-(which(rownames(counts_sample3_2) %in% Bad_list_sample3_2)),]
+refiltered_sample3_2_seurat <- subset(sample3_2_seurat, features = rownames(counts_sample3_2))
+```
+
+Merge and integrate data
+```{r}
+TotalMerged <- merge(refiltered_sample1_seurat, y = c(refiltered_sample2_seurat, refiltered_sample3_seurat, refiltered_sample1_2_seurat, refiltered_sample2_2_seurat, refiltered_sample3_2_seurat), add.cell.ids = c("sample1", "sample2", "sample3", "sample1_2", "sample2_2", "sample3_2"), project = "total",
+    merge.data = TRUE)
+
+# re-join layers after integration
+TotalMerged[["RNA"]] <- JoinLayers(TotalMerged[["RNA"]])
+```
+
+```{r}
+save(TotalMerged, file = "Merged_Filtered.RData")
+```
+
+```{r}
+TotalMerged <- SCTransform(object = TotalMerged, vars.to.regress = "percent.mt", verbose = FALSE)
+# These are now standard steps in the Seurat workflow for visualization and clustering
+```
+
+
+```{r}
+TotalMerged <- RunPCA(TotalMerged)
+TotalMerged <- RunUMAP(TotalMerged, dims = 1:30)
+ElbowPlot(TotalMerged)
+```
+
+```{r}
+DimHeatmap(TotalMerged, dims = 1:20, cells = 500, balanced = TRUE)
+```
+
+```{r}
+##Lowest Resolution
+TotalMerged <- FindNeighbors(TotalMerged, reduction = "pca", dims = 1:10)
+TotalMerged <- FindClusters(TotalMerged, resolution = 0.1, verbose = FALSE)
+DimPlot(TotalMerged, label = TRUE)
+DimPlot(TotalMerged, group.by = "cells")
+```
+
+```{r}
+DimPlot(TotalMerged, group.by = "pheno")
+```
+
+```{r}
+##Highest Resolution
+TotalMergedHiRes <- FindNeighbors(TotalMerged, reduction = "pca", dims = 1:20)
+TotalMergedHiRes <- FindClusters(TotalMerged, resolution = 0.5)
+DimPlot(TotalMergedHiRes, label = TRUE)
+
+```
+
+```{r}
+markersHiRes <- FindAllMarkers(TotalMergedHiRes)
+```
+
+```{r}
+cluster0.markers <- FindMarkers(TotalMergedHiRes, ident.1 = "0", logfc.threshold = 0.25, test.use = "roc", only.pos = TRUE)
+```
+
+```{r}
+DotPlot(TotalMergedHiRes, group.by = "pheno", features = "Crip1")
+```
+
+```{r}
+VlnPlot(TotalMergedHiRes, features = "Foxp3", split.by = "cells")
+```
+
+
