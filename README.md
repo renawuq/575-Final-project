@@ -4,8 +4,8 @@
 
 - [Installation](#installation)
 - [Data](#data)
-- [Usage](#usage)
-- [Other_files](#other-files)
+- [Code](#code)
+- [Image](#image)
 
 ## Installation
 
@@ -19,17 +19,20 @@
     - Change the file paths in the code to point to your own dataset files.
 
 3. Ensure you have all required dependencies installed
-    - [List any dependencies, e.g., Python libraries, R packages, etc.]
-    - [How to install dependencies, e.g., `pip install -r requirements.txt` for Python, etc.]
+
+4. Adjust the code if needed
 
 ## Data
 
 Due to privacy and confidentiality agreements, the dataset used in this project cannot be shared publicly. However, you can substitute the data with your own dataset.
 
-
-## Other_files
-
-- [List any other important files in the repository and their purpose, e.g., scripts, documentation, etc.]
+## Code
     - `code_for_upload.Rmd`: Main script to run the analysis
     - `DESeq2`: add laterrrrrrr
+    - '' : add laterrrrrrrrr
+
+## Image
+
+This folder contain all the image generated from our code
+
 
