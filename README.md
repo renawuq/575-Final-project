@@ -6,7 +6,6 @@
 - [Data](#data)
 - [Code](#code)
 - [File Descriptions](#file-descriptions)
-- [Image](#image)
 
 ## Installation
 
@@ -100,6 +99,3 @@ This section contains all the code used for the project, including data preproce
 - **`cluster1-20termsize.cys`**:  
   Similar to `cluster0-20termsize.cys`, this file contains the visualization of Enrichment analysis results for **cluster 1**, also produced using gProfiler and visualized in Cytoscape.
 
-## Image
-
-This folder contains images generated from the code. These visualizations will help you interpret the analysis results, including plots for DGE, clustering, and enrichment analysis.
