@@ -27,7 +27,7 @@ library(glmGamPoi)
 ```
 
 Load in 10X objects
-GFP- and GFP+ T cells from tissueney tissue 
+GFP- and GFP+ T cells from tissue 
 ```{r}
 sample1 <- Read10X(data.dir = "file_path_to_tissue_data_sample1_1")
 sample2 <- Read10X(data.dir = "file_path_to_tissue_data_sample2_1")
@@ -38,7 +38,7 @@ sample2_2 <- Read10X(data.dir = "file_path_to_tissue_data_sample2_2")
 sample3_2 <- Read10X(data.dir = "file_path_to_tissue_data_sample3_2")
 ```
 
-Create seurat object from gene expression data (not TCR)
+Create seurat object from gene expression data, select for cells with at least 200 genes with detected expression
 ```{r}
 sample1_seurat <- CreateSeuratObject(counts = sample1$`Gene Expression`, min.features = 200, project = "sample1")
 sample1_2_seurat <- CreateSeuratObject(counts = sample1_2$`Gene Expression`, min.features = 200, project = "sample1_2")
@@ -114,6 +114,7 @@ sample3_2_seurat<-subset(sample3_2_seurat, subset = percent.mt < 10 & nFeature_R
 ```
 
 ```{r}
+#remove any unwanted gene
 counts_sample1 <- GetAssayData(sample1_seurat, assay = "RNA")
 Bad_list_sample1 <- str_subset(rownames(counts_sample1), "Trav|Trbv|Trgv|Rps|Rpl|Mrps|Ighv|Igl|Igk")
 counts_sample1 <- counts_sample1[-(which(rownames(counts_sample1) %in% Bad_list_sample1)),]
@@ -165,12 +166,14 @@ TotalMerged <- SCTransform(object = TotalMerged, vars.to.regress = "percent.mt",
 
 
 ```{r}
+# run PCA and UMAP
 TotalMerged <- RunPCA(TotalMerged)
 TotalMerged <- RunUMAP(TotalMerged, dims = 1:30)
 ElbowPlot(TotalMerged)
 ```
 
 ```{r}
+# Visualization
 DimHeatmap(TotalMerged, dims = 1:20, cells = 500, balanced = TRUE)
 ```
 
@@ -201,13 +204,3 @@ markersHiRes <- FindAllMarkers(TotalMergedHiRes)
 ```{r}
 cluster0.markers <- FindMarkers(TotalMergedHiRes, ident.1 = "0", logfc.threshold = 0.25, test.use = "roc", only.pos = TRUE)
 ```
-
-```{r}
-DotPlot(TotalMergedHiRes, group.by = "pheno", features = "Crip1")
-```
-
-```{r}
-VlnPlot(TotalMergedHiRes, features = "Foxp3", split.by = "cells")
-```
-
-
