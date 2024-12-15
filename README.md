@@ -26,9 +26,9 @@ install.packages("glmGamPoi")
 install.packages("presto")
 install.packages("Seurat")
 install.packages("sctransform")
+```
 
-
-4. Adjust the code if needed
+4. Adjust the code if needed (i.e. change the file path, change the remain genes based on different research topic)
 
 ## Data
 
