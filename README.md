@@ -1,4 +1,4 @@
-# 575-Final-project
+# 575-Final-project Workflow 
 
 ## Table of Contents
 
@@ -18,7 +18,15 @@
     - Download or prepare your own **MEX data** (or any relevant dataset) that you would like to analyze.
     - Change the file paths in the code to point to your own dataset files.
 
-3. Ensure you have all required dependencies installed
+3. Before running the code, make sure you have all the required libraries installed. You can install the necessary R packages by running the following commands in your R console:
+
+```r
+install.packages(c("cowplot", "dplyr", "ggplot2", "readr", "patchwork", "tidyverse", "tidyr", "metap", "multtest"))
+install.packages("glmGamPoi")
+install.packages("presto")
+install.packages("Seurat")
+install.packages("sctransform")
+
 
 4. Adjust the code if needed
 
@@ -28,6 +36,8 @@ Due to privacy and confidentiality agreements, the dataset used in this project 
 
 ## Code
 This part contains all the code we used for the project, including data preprocessing and data analysis:
+
+You could run the code in the following order: 
 
 - `data_preprocessing_clustering.Rmd`: The first script you should run for data preprocessing and clustering.
 - `DGE_cbb575.Rmd`: The script for DGE analysis and identifying markers.
