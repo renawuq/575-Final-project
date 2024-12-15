@@ -27,12 +27,13 @@
 Due to privacy and confidentiality agreements, the dataset used in this project cannot be shared publicly. However, you can substitute the data with your own dataset.
 
 ## Code
-    - `code_for_upload.Rmd`: Main script to run the analysis
-    - `DESeq2`: add laterrrrrrr
-    - '' : add laterrrrrrrrr
+This part contain all the code we used for the project including data preprocessing and data analysis
+    - `data_preprocssing_clustering.Rmd`: It is the first script you should run for the data preprocessing and clustering 
+    - `DGE cbb575.Rmd`: The code we perform for DGE analysis and find marker
+    - `filtering20termsizes.ipynb`, `cytokinehelper2graph.ipynb`: helper code for Enrichment analysis
+    - `cluster0-20termsize.cys` \ `cluster0-20termsize.cys`: Enrichment analysis we performed with gProfiler and visualized with Cytoscape
 
 ## Image
-
-This folder contain all the image generated from our code
+This folder contain some of the image generated from our code
 
 
